@@ -1,4 +1,3 @@
-﻿
 using System;
 using System.Threading;
 
@@ -28,7 +27,7 @@ namespace MCGalaxy
             Player[] players = PlayerInfo.Online.Items;
             foreach (Player p in players)
             {
-                 
+                if (!p.level.Config.MOTD.ToLower().Contains("+minimap")) continue;
                 //checks if the block with id 36 is held change for a custom block id to use as a map 
                 int held = p.GetHeldBlock();
                 if (held != 36) continue;
@@ -156,7 +155,7 @@ namespace MCGalaxy
 
                     pcol++;
                 }
-                p.Message("------ljmap------");
+                p.Message("-----minimap-----");
             }
         }
         static int FindYBelow(Level lvl, ushort x, int y, ushort z)
