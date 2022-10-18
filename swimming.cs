@@ -1,4 +1,3 @@
-﻿
 //this plugin requires the custom models plugin - CustomModels: https://github.com/NotAwesome2/MCGalaxy-CustomModels/releases/tag/v1.4.2
 //(you will also have to copy https://github.com/NotAwesome2/MCGalaxy-CustomModels/blob/master/Newtonsoft.Json.dll into the folder mcgalaxy lives)
 //
@@ -6,12 +5,13 @@
 //in the new models folder in the plugin folder
 //
 //after you have put the model in run these cmds
-//
 // /custommodel config crawling eyeY 4
 // /custommodel config crawling calchumananims false
 // /custommodel config crawling bobbing false
 // /custommodel config crawling collisionbounds 8.6 12 8.6
 // /custommodel config crawling pickingbounds 0 0 0 8 12 32
+//
+// you will now star crawling if you are in a 1 block tall space and start swimming if you press left-shift in water
 using System;
 using System.Threading;
 
