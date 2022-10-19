@@ -11,7 +11,7 @@
 // /custommodel config crawling collisionbounds 8.6 12 8.6
 // /custommodel config crawling pickingbounds 0 0 0 8 12 32
 //
-// you will now star crawling if you are in a 1 block tall space and start swimming if you press left-shift in water
+// you will now start crawling if you are in a 1 block tall space and start swimming if you press left-shift in water (stop moving to stop swimming)
 using System;
 using System.Threading;
 
@@ -38,17 +38,20 @@ namespace MCGalaxy
 
             Command.Register(new Cmdswim());
         }
- 
+
         static void Use(SchedulerTask task)
         {
             Player[] players = PlayerInfo.Online.Items;
             foreach (Player p in players)
-            {
+            { 
                 int x = p.Pos.BlockX, y = p.Pos.BlockY, z = p.Pos.BlockZ;
-                bool inblock = false;             
-                inblock = Findblock(p.level, (ushort)x, (ushort)y, (ushort)z);
+                int px = p.Pos.X, pz = p.Pos.Z;
+                bool inblock = false;
+                inblock = Findblock(p.level, (ushort)x, (ushort)y, (ushort)z, p, px, pz);
                 if (!p.Supports(CpeExt.TextHotkey)) continue;
                 p.Send(Packet.TextHotKey("swim", "/swim◙", 42, 0, true));
+                p.Extras["pastcoordx"] = px;
+                p.Extras["pastcoordz"] = pz;
                 //checks if your a human model so it will work with other plugins and doesnt turn a chicken into a person
                 if (inblock == true && ((p.IsLikelyInsideBlock()) || p.Extras.GetBoolean("wantsswim") == true) && (p.Model == "humanoid"))
                 {
@@ -69,16 +72,20 @@ namespace MCGalaxy
                 else p.Extras["wantsswim"] = false; continue;
             }
         }
-      
+
         //checks if the block at one more then your Ycoord is soild and your current coord is not/checks if your in water
-        static bool Findblock(Level lvl, ushort x, int y, ushort z)
-        {  
-                BlockID block = lvl.GetBlock(x, (ushort)y, z);
-                BlockID block2 = lvl.GetBlock(x, (ushort)(y - 1), z);
+        static bool Findblock(Level lvl, ushort x, int y, ushort z, Player p, int px, int pz)
+        {
+            BlockID block = lvl.GetBlock(x, (ushort)y, z);
+            BlockID block2 = lvl.GetBlock(x, (ushort)(y - 1), z);
             if (CollideType.IsSolid(lvl.CollideType(block))) return true;
             //add list of blocks you can swim in here (can't use block def becuase lava isn't swimthrough)
-            if (block2 == 9 || block2 == 8) return true;
-            else return false;   
+            if (block2 == 9 || block2 == 8)
+            {
+              if ((p.Extras.GetInt("pastcoordx") != px) || (p.Extras.GetInt("pastcoordz") != pz)) return true;
+              else return false;
+            }     
+            else return false;
         }
 
         public sealed class Cmdswim : Command2
