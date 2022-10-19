@@ -66,7 +66,7 @@ namespace MCGalaxy
                     p.UpdateModel("humanoid");
                     p.Extras["wantsswim"] = false;
                 }
-                else continue;
+                else p.Extras["wantsswim"] = false; continue;
             }
         }
       
