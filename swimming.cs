@@ -78,9 +78,11 @@ namespace MCGalaxy
         {
             BlockID block = lvl.GetBlock(x, (ushort)y, z);
             BlockID block2 = lvl.GetBlock(x, (ushort)(y - 1), z);
+            int fixblock2 = block2;
+            if (fixblock2 >= 66) fixblock2 = block2 - 256;
             if (CollideType.IsSolid(lvl.CollideType(block))) return true;
-            //add list of blocks you can swim in here (can't use block def becuase lava isn't swimthrough)
-            if (block2 == 9 || block2 == 8)
+            //add list of blocks you can swim in here like this ...|| fixblock2 == [block id here]...)(can't use block def becuase lava isn't swimthrough)
+            if (fixblock2 == 9 || fixblock2 == 8)
             {
               if ((p.Extras.GetInt("pastcoordx") != px) || (p.Extras.GetInt("pastcoordz") != pz)) return true;
               else return false;
