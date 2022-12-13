@@ -30,6 +30,7 @@ namespace MCGalaxy
                 if (!p.level.Config.MOTD.ToLower().Contains("+minimap")) continue;
                 //checks if the block with id 36 is held change for a custom block id to use as a map 
                 int held = p.GetHeldBlock();
+                if (held >= 66) held = held - 256;
                 if (held != 36) continue;
                 ClearChat(p);
                 int col = 0;
