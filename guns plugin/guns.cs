@@ -1,9 +1,10 @@
-﻿//reference System.Core.dll
+//reference System.Core.dll
 
 //how to use
 // add a bot with /bothp spawn (/help bothp for more info)
 // goto line 60 to add more weapons and set the weapon ids
 // type "/motd +guns" for the plugin to work on that map 
+// you will need to replace all "secretcode" with a new code
 
 using System;
 using System.Linq;
@@ -63,8 +64,8 @@ namespace MCGalaxy
 						dist = 30;
 						maxammo = 20;
 						delay = 100;
-						p.Extras["wdamage"] = 25;
-						p.Extras["sleep"] = 750;
+						p.Extras["wdamage"] = 30;
+						p.Extras["sleep"] = 500;
 
 						p.SendCpeMessage(CpeMessageType.Status2, "%f[%b" + p.Extras.GetInt("ammo" + held.ToString()) + "%f/%b" + maxammo + "%f]");
 
@@ -82,9 +83,9 @@ namespace MCGalaxy
 					{
 						dist = 75;
 						maxammo = 3;
-						delay = 2000;
-						p.Extras["wdamage"] = 50;
-						p.Extras["sleep"] = 3000;
+						delay = 3000;
+						p.Extras["wdamage"] = 90;
+						p.Extras["sleep"] = 1000;
 
 						p.SendCpeMessage(CpeMessageType.Status2, "%f[%b" + p.Extras.GetInt("ammo" + held.ToString()) + "%f/%b" + maxammo + "%f]");
 
@@ -104,7 +105,7 @@ namespace MCGalaxy
 						maxammo = 30;
 						delay = 1000;
 						p.Extras["wdamage"] = 15;
-						p.Extras["sleep"] = 1000;
+						p.Extras["sleep"] = 50;
 
 						p.SendCpeMessage(CpeMessageType.Status2, "%f[%b" + p.Extras.GetInt("ammo" + held.ToString()) + "%f/%b" + maxammo + "%f]");
 
@@ -123,8 +124,8 @@ namespace MCGalaxy
 						dist = 7;
 						maxammo = 6;
 						delay = 1500;
-						p.Extras["wdamage"] = 35;
-						p.Extras["sleep"] = 2000;
+						p.Extras["wdamage"] = 50;
+						p.Extras["sleep"] = 750;
 
 
 						p.SendCpeMessage(CpeMessageType.Status2, "%f[%b" + p.Extras.GetInt("ammo" + held.ToString()) + "%f/%b" + maxammo + "%f]");
@@ -229,7 +230,7 @@ namespace MCGalaxy
 				message = message + " null";
 				string[] botName2 = message.SplitSpaces();
 				string botNamenohp = botName2[1];
-				if (botName2[0] != "spawn")
+				if (botName2[0] != "spawn" && botName2[0] != "php")
 				{
 					if (p.Extras.GetBoolean("runing") == false)
 					{
@@ -264,8 +265,8 @@ namespace MCGalaxy
 						p.Extras["runing"] = false;
 					}
 				}//if first arg spawn add a bot with health
-				else
-                {
+				else if (botName2[0] != "php")
+				{
 					
 					if (!p.level.Config.MOTD.ToLower().Contains("+guns")) return;
 					
@@ -287,6 +288,45 @@ namespace MCGalaxy
 					{
 						string aimessage = botName + " " + aiIns;
 						AI(p, aimessage, data);
+					}
+				}
+				else //for adding health with cmds
+                {
+					if (botName2[2] == "secretcode");
+					{
+						if(botName2[3] != null)
+                        {
+							Player pcheck = PlayerInfo.FindMatches(p, botName2[3]);
+							if (pcheck != null) p = pcheck;
+						}
+
+						int health = p.Extras.GetInt("health");
+
+						int gainedhp = Int32.Parse(botName2[1]);
+
+						health = health + gainedhp;
+
+						if (health >= 200)
+						{
+							health = 200;
+						}
+
+						if (health <= 0)
+						{
+							//set custom death msg
+							string msg = "@p has died";
+							p.HandleDeath(Block.Cobblestone, msg);
+							health = 100;
+						}
+						if (health > 15)
+						{
+							p.SendCpeMessage(CpeMessageType.BottomRight2, "%f-|[%a" + health.ToString() + "%f]|-");
+						}
+						else
+						{
+							p.SendCpeMessage(CpeMessageType.BottomRight2, "%f-|[%c" + health.ToString() + "%f]|-");
+						}
+						p.Extras["health"] = health;
 					}
 				}
 			}
@@ -327,13 +367,30 @@ namespace MCGalaxy
 
 			void RemoveBot(Player p, string botName , string botNamenohp)
 			{
-					PlayerBot bot = Matcher.FindBots(p, botName);
-					if (bot == null) return;
+				PlayerBot bot = Matcher.FindBots(p, botName);
+				if (bot == null) return;
 
+				Random dropchance = new Random();
+				int random = dropchance.Next(0, 2);
+
+				if (bot.Model != "42|0.5" && random == 1)
+				{
+					//kill message
+					p.Message("killed " + bot.Model, bot.ColoredName);
+
+					bot.UpdateModel("42|0.5");
+					string nick = "%c[%f-%c+%f-%c]";
+					SetBotNick(p, botName, nick);
+
+					bot.hunt = !bot.hunt;
+					bot.Instructions.Clear();
+					bot.AIName = null;
+					UpdateBot(p, bot, "" + bot.hunt);
+				}
+				else
+                {
 					PlayerBot.Remove(bot);
-				//kill message
-					p.Message("killed " + botNamenohp, bot.ColoredName);
-				
+				}
 			}
 
 			void SetBotText(Player p, string botName, string text, LevelPermission plRank)
@@ -437,6 +494,7 @@ namespace MCGalaxy
 			public override void Help(Player p)
 			{
 				p.Message("%T/bothp %H- gives bots hp; to add a bot with hp run /bothp spawn [bot name] [hp] <ai>.");
+				p.Message("%T/bothp %H- php [health] [secret code] <player name>. if player name is not set it defaults to the user");
 			}
 		}
 
@@ -504,27 +562,33 @@ namespace MCGalaxy
 			//change damage/speed based on model
 			if (bot.Model == "zombie")
 			{
-				p.Extras["botsleep" + botnohp] = 10;
+				p.Extras["botsleep" + botnohp] = 8;
 				damage = 30;
 			}
 			else if (bot.Model == "giant")
 			{
-				p.Extras["botsleep" + botnohp] = 20;
+				p.Extras["botsleep" + botnohp] = 16;
 				damage = 50;
 			}
 			else if (bot.Model == "spider")
 			{
-				p.Extras["botsleep" + botnohp] = 8;
+				p.Extras["botsleep" + botnohp] = 5;
 				damage = 15;
 			}
 			else if (bot.Model == "skeleton")
 			{
-				p.Extras["botsleep" + botnohp] = 8;
+				p.Extras["botsleep" + botnohp] = 6;
 				damage = 30;
+			}
+			//set negitive damage for hp pickups
+			else if (bot.Model == "42|0.5")
+			{
+				damage = -25;
+				PlayerBot.Remove(bot);
 			}
 			else
 			{
-				p.Extras["botsleep" + botnohp] = 10;
+				p.Extras["botsleep" + botnohp] = 8;
 				damage = 10;
 			}
 			dodamage(p, damage, bot);
@@ -535,6 +599,12 @@ namespace MCGalaxy
 			int health = p.Extras.GetInt("health");
 
 			health = health - damage;
+
+			if (health >= 200)
+			{
+				health = 200;
+			}
+
 			if (health <= 0)
 			{
 				//set custom death msg
@@ -552,6 +622,11 @@ namespace MCGalaxy
 			}
 			p.Extras["health"] = health;
 
+			if (damage >= 0) knockback(p, bot);
+		}
+
+		static void knockback(Player p, PlayerBot bot)
+        {
 			int xv = -1;
 			int yv = 0;
 			int zv = -1;
