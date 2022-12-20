@@ -1,0 +1,25 @@
+{
+  "nameY": 32.5,
+  "autoNameY": true,
+  "eyeY": 4.0,
+  "collisionBounds": {
+    "X": 8.6,
+    "Y": 12.0,
+    "Z": 8.6
+  },
+  "pickingBoundsMin": {
+    "X": 0.0,
+    "Y": 0.0,
+    "Z": 0.0
+  },
+  "pickingBoundsMax": {
+    "X": 8.0,
+    "Y": 12.0,
+    "Z": 32.0
+  },
+  "bobbing": false,
+  "pushes": true,
+  "usesHumanSkin": true,
+  "calcHumanAnims": false,
+  "defaultSkin": null
+}
