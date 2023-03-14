@@ -1,4 +1,4 @@
-//goto line 35 and replace the url to the web only url
+//goto line 34 and replace the url to the web only url
 //add +webtex to any level you want to use the alt webclient texture
 
 using System;
@@ -27,7 +27,6 @@ namespace MCGalaxy
             if(p.level.Config.MOTD.ToLower().Contains("+webtex"))
             {
                 string appName = p.Session.ClientName();
-                p.Message("this is a test your Client is " + appName);
                 
                 if(appName.Contains("web"))
                 {
