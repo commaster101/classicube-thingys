@@ -44,7 +44,7 @@ namespace MCGalaxy
 
             public override void Help(Player p)
             {
-                p.Message("&Tmass sets pervisit");
+                p.Message("&Tmass sets pervisit for every level to use type /setpervisit [rank]");
             }
         }
 
