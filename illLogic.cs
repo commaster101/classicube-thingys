@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+
 using MCGalaxy.Blocks.Physics;
 using MCGalaxy.Events.LevelEvents;
 using MCGalaxy.Events.PlayerEvents;
@@ -14,14 +16,28 @@ namespace MCGalaxy {
         static string author = "LJplays+";
 		public override string creator { get { return author; } }
         
-        //The level we want to add a custom physics block to.
-        static string physicsLevelName = "ljplays";
-        
+        //The MOTD to add custom physics to a Level.
+        static string physicsMOTDName = "+logic";
+
+        //the MOTD to make it blocks can't be made or deleted only moved
+        static string infMOTDName = "-inflogic";
+
         //This is a server-side block IDs for all the blocks added
+
+        static BlockID obsidian = 49;
+        static BlockID bedrock = 7;
+        static BlockID buttonBlock = 360;
+
+        //texture like reneforce cable or somthing
         static BlockID wireBlock = 359;
 
+        //moves up and down mabye arrows?
         static BlockID flipperBlock = 362;
 
+        //texture should show that it pushs
+        static BlockID repellerBlock = 366;
+
+        //some kind of styled arrow mabye like a claw
         static BlockID placerDBlock = 361;
         static BlockID placerUBlock = 365;
         static BlockID placerNBlock = 373;
@@ -29,15 +45,18 @@ namespace MCGalaxy {
         static BlockID placerEBlock = 375;
         static BlockID placerWBlock = 376;
 
+        //like a lamp lol
         static BlockID lightOnBlock = 363;
         static BlockID lightOffBlock = 364;
 
+        //a basic arrow 
         static BlockID weyNBlock = 367;
         static BlockID weySBlock = 368;
         static BlockID weyEBlock = 369;
         static BlockID weyWBlock = 370;
         static BlockID weyUBlock = 371;
         static BlockID weyDBlock = 372;
+
         //You can find the server-side block ID in a custom command with:
         //Vec3S32 pos = p.Pos.FeetBlockCoords;
         //p.Message("Server-side BlockID at this location is {0}", p.level.GetBlock((ushort)pos.X, (ushort)pos.Y, (ushort)pos.Z));
@@ -47,10 +66,11 @@ namespace MCGalaxy {
             //The map we want to add a physics block to might already be loaded when the plugin starts, thus we have to add it right away in that case.
 			Level[] levels = LevelInfo.Loaded.Items;
 			foreach (Level lvl in levels) {
-                if (lvl.name == physicsLevelName) {
+                if (lvl.Config.MOTD.ToLower().Contains(physicsMOTDName)) {
                     lvl.PhysicsHandlers[wireBlock] = DoWire;
-
                     lvl.PhysicsHandlers[flipperBlock] = DoFlipper;
+
+                    lvl.PhysicsHandlers[repellerBlock] = DoRepeller;
 
                     lvl.PhysicsHandlers[placerDBlock] = DoPlacer;
                     lvl.PhysicsHandlers[placerUBlock] = DoPlacer;
@@ -82,10 +102,12 @@ namespace MCGalaxy {
         }
         
 		static void OnBlockHandlersUpdated(Level lvl, BlockID block) {
-            if (lvl.name != physicsLevelName) { return; }
+            if (!lvl.Config.MOTD.ToLower().Contains(physicsMOTDName)) { return; }
             if (block == wireBlock) lvl.PhysicsHandlers[wireBlock] = DoWire;
 
             if (block == flipperBlock) lvl.PhysicsHandlers[flipperBlock] = DoFlipper;
+
+            if (block == repellerBlock) lvl.PhysicsHandlers[repellerBlock] = DoRepeller;
 
             if (block == placerDBlock) lvl.PhysicsHandlers[placerDBlock] = DoPlacer;
             if (block == placerUBlock) lvl.PhysicsHandlers[placerUBlock] = DoPlacer;
@@ -109,7 +131,7 @@ namespace MCGalaxy {
         {
             BlockID block = p.level.GetBlock(x, y, z);
 
-            if (block != 360) return;
+            if (block != buttonBlock) return;
             if (button != MouseButton.Right) return;
             if (action == MouseAction.Pressed) return;
             Dotoggle(p, x, y, z);
@@ -157,7 +179,85 @@ namespace MCGalaxy {
             }
             C.Data.Data = PhysicsArgs.RemoveFromChecks;
         }
-    
+
+        static void DoRepeller(Level lvl, ref PhysInfo C)
+        {
+            ushort x = C.X, y = C.Y, z = C.Z;
+            int index = C.Index;
+
+            List<int> unpushable = new List<int>();
+            unpushable.Add(obsidian);
+            unpushable.Add(bedrock);
+            unpushable.Add(flipperBlock);
+            unpushable.Add(buttonBlock);
+            unpushable.Add(0);
+
+            //don't use lvl.IntOffset cus threading and stuff mucks up physics
+            if (!unpushable.Contains(lvl.GetBlock(x, (ushort)(y + 1), z)) && (lvl.GetBlock(x, (ushort)(y + 2), z) == 0))
+            {
+                BlockID push = lvl.GetBlock(x, (ushort)(y + 1), z);
+
+                lvl.GetBlock(x, (ushort)(y + 1), z, out index);
+                lvl.AddUpdate(index, 0, true);
+
+                lvl.GetBlock(x, (ushort)(y + 2), z, out index);
+                lvl.AddUpdate(index, push, true);
+            }
+            if (!unpushable.Contains(lvl.GetBlock(x, (ushort)(y - 1), z)) && (lvl.GetBlock(x, (ushort)(y - 2), z) == 0))
+            {
+                BlockID push = lvl.GetBlock(x, (ushort)(y - 1), z);
+
+                lvl.GetBlock(x, (ushort)(y - 1), z, out index);
+                lvl.AddUpdate(index, 0, true);
+
+                lvl.GetBlock(x, (ushort)(y - 2), z, out index);
+                lvl.AddUpdate(index, push, true);
+            }
+
+            if (!unpushable.Contains(lvl.GetBlock((ushort)(x + 1), y, z)) && (lvl.GetBlock((ushort)(x + 2), y, z) == 0))
+            {
+                BlockID push = lvl.GetBlock((ushort)(x + 1), y, z);
+
+                lvl.GetBlock((ushort)(x + 1), y, z, out index);
+                lvl.AddUpdate(index, 0, true);
+
+                lvl.GetBlock((ushort)(x + 2), y, z, out index);
+                lvl.AddUpdate(index, push, true);
+            }
+            if (!unpushable.Contains(lvl.GetBlock((ushort)(x - 1), y, z)) && (lvl.GetBlock((ushort)(x - 2), y, z) == 0))
+            {
+                BlockID push = lvl.GetBlock((ushort)(x - 1), y, z);
+
+                lvl.GetBlock((ushort)(x - 1), y, z, out index);
+                lvl.AddUpdate(index, 0, true);
+
+                lvl.GetBlock((ushort)(x - 2), y, z, out index);
+                lvl.AddUpdate(index, push, true);
+            }
+
+            if (!unpushable.Contains(lvl.GetBlock(x, y, (ushort)(z + 1))) && (lvl.GetBlock(x, y, (ushort)(z + 2)) == 0))
+            {
+                BlockID push = lvl.GetBlock(x, y, (ushort)(z + 1));
+
+                lvl.GetBlock(x, y, (ushort)(z + 1), out index);
+                lvl.AddUpdate(index, 0, true);
+
+                lvl.GetBlock(x, y, (ushort)(z + 2), out index);
+                lvl.AddUpdate(index, push, true);
+            }
+            if (!unpushable.Contains(lvl.GetBlock(x, y, (ushort)(z - 1))) && (lvl.GetBlock(x, y, (ushort)(z - 2)) == 0))
+            {
+                BlockID push = lvl.GetBlock(x, y, (ushort)(z - 1));
+
+                lvl.GetBlock(x, y, (ushort)(z - 1), out index);
+                lvl.AddUpdate(index, 0, true);
+
+                lvl.GetBlock(x, y, (ushort)(z - 2), out index);
+                lvl.AddUpdate(index, push, true);
+            }
+
+            C.Data.Data = PhysicsArgs.RemoveFromChecks;
+        }
 
         static void Dowey(Level lvl, ref PhysInfo C)
         {
@@ -246,61 +346,110 @@ namespace MCGalaxy {
             C.Data.Data = PhysicsArgs.RemoveFromChecks;
         }
 
+        //this code is really ugly sorry
         static void DoPlacer(Level lvl, ref PhysInfo C)
         {
             ushort x = C.X, y = C.Y, z = C.Z;
             BlockID block = lvl.GetBlock(x, y, z);
             if (block == placerUBlock) {
                 BlockID below = lvl.GetBlock(x, (ushort)(y - 1), z);
-                if (below == placerUBlock) return;
+                if (lvl.Config.MOTD.ToLower().Contains(infMOTDName) && lvl.GetBlock(x, (ushort)(y + 1), z) != 0) { C.Data.Data = PhysicsArgs.RemoveFromChecks; return; }
+                if (lvl.Config.MOTD.ToLower().Contains(infMOTDName) && below == 0) { C.Data.Data = PhysicsArgs.RemoveFromChecks; return; }
+                if (below == placerUBlock) { C.Data.Data = PhysicsArgs.RemoveFromChecks; return; }
                 int index;
                 lvl.GetBlock(x, (ushort)(y + 1), z, out index);
                 lvl.AddUpdate(index, below, true);
+
+                if (lvl.Config.MOTD.ToLower().Contains(infMOTDName))
+                {
+                    lvl.GetBlock(x, (ushort)(y - 1), z, out index);
+                    lvl.AddUpdate(index, 0, true);
+                }
                 C.Data.Data = PhysicsArgs.RemoveFromChecks;
             }
             else if(block == placerDBlock)
             {
                 BlockID above = lvl.GetBlock(x, (ushort)(y + 1), z);
-                if (above == placerDBlock) return;
+                if (lvl.Config.MOTD.ToLower().Contains(infMOTDName) && lvl.GetBlock(x, (ushort)(y - 1), z) != 0) { C.Data.Data = PhysicsArgs.RemoveFromChecks; return; }
+                if (lvl.Config.MOTD.ToLower().Contains(infMOTDName) && above == 0) { C.Data.Data = PhysicsArgs.RemoveFromChecks; return; }
+                if (above == placerDBlock) { C.Data.Data = PhysicsArgs.RemoveFromChecks; return; }
                 int index;
                 lvl.GetBlock(x, (ushort)(y - 1), z, out index);
                 lvl.AddUpdate(index, above, true);
+
+                if (lvl.Config.MOTD.ToLower().Contains(infMOTDName))
+                {
+                    lvl.GetBlock(x, (ushort)(y + 1), z, out index);
+                    lvl.AddUpdate(index, 0, true);
+                }
                 C.Data.Data = PhysicsArgs.RemoveFromChecks;
             }
             else if(block == placerNBlock)
             {
                 BlockID behind = lvl.GetBlock(x, y, (ushort)(z + 1));
-                if (behind == placerNBlock) return;
+                if (lvl.Config.MOTD.ToLower().Contains(infMOTDName) && lvl.GetBlock(x, y, (ushort)(z - 1)) != 0) { C.Data.Data = PhysicsArgs.RemoveFromChecks; return; }
+                if (lvl.Config.MOTD.ToLower().Contains(infMOTDName) && behind == 0) { C.Data.Data = PhysicsArgs.RemoveFromChecks; return; }
+                if (behind == placerNBlock) { C.Data.Data = PhysicsArgs.RemoveFromChecks; return; }
                 int index;
                 lvl.GetBlock(x, y, (ushort)(z - 1), out index);
                 lvl.AddUpdate(index, behind, true);
+
+                if (lvl.Config.MOTD.ToLower().Contains(infMOTDName))
+                {
+                    lvl.GetBlock(x, y, (ushort)(z + 1), out index);
+                    lvl.AddUpdate(index, 0, true);
+                }
                 C.Data.Data = PhysicsArgs.RemoveFromChecks;
             }
             else if(block == placerSBlock)
             {
                 BlockID behind = lvl.GetBlock(x, y, (ushort)(z - 1));
-                if (behind == placerSBlock) return;
+                if (lvl.Config.MOTD.ToLower().Contains(infMOTDName) && lvl.GetBlock(x, y, (ushort)(z + 1)) != 0) { C.Data.Data = PhysicsArgs.RemoveFromChecks; return; }
+                if (lvl.Config.MOTD.ToLower().Contains(infMOTDName) && behind == 0) { C.Data.Data = PhysicsArgs.RemoveFromChecks; return; }
+                if (behind == placerSBlock) { C.Data.Data = PhysicsArgs.RemoveFromChecks; return; }
                 int index;
                 lvl.GetBlock(x, y, (ushort)(z + 1), out index);
                 lvl.AddUpdate(index, behind, true);
+
+                if (lvl.Config.MOTD.ToLower().Contains(infMOTDName))
+                {
+                    lvl.GetBlock(x, y, (ushort)(z - 1), out index);
+                    lvl.AddUpdate(index, 0, true);
+                }
                 C.Data.Data = PhysicsArgs.RemoveFromChecks;
             }
             else if(block == placerEBlock)
             {
                 BlockID behind = lvl.GetBlock((ushort)(x - 1), y, z);
-                if (behind == placerEBlock) return;
+                if (lvl.Config.MOTD.ToLower().Contains(infMOTDName) && lvl.GetBlock((ushort)(x + 1), y, z) != 0) { C.Data.Data = PhysicsArgs.RemoveFromChecks; return; }
+                if (lvl.Config.MOTD.ToLower().Contains(infMOTDName) && behind == 0) { C.Data.Data = PhysicsArgs.RemoveFromChecks; return; }
+                if (behind == placerEBlock) { C.Data.Data = PhysicsArgs.RemoveFromChecks; return; }
                 int index;
                 lvl.GetBlock((ushort)(x + 1), y, z, out index);
                 lvl.AddUpdate(index, behind, true);
+
+                if (lvl.Config.MOTD.ToLower().Contains(infMOTDName))
+                {
+                    lvl.GetBlock((ushort)(x - 1), y, z, out index);
+                    lvl.AddUpdate(index, 0, true);
+                }
                 C.Data.Data = PhysicsArgs.RemoveFromChecks;
             }
             else if(block == placerWBlock)
             {
                 BlockID behind = lvl.GetBlock((ushort)(x + 1), y, z);
-                if (behind == placerWBlock) return;
+                if (lvl.Config.MOTD.ToLower().Contains(infMOTDName) && lvl.GetBlock((ushort)(x - 1), y, z) != 0) { C.Data.Data = PhysicsArgs.RemoveFromChecks; return; }
+                if (lvl.Config.MOTD.ToLower().Contains(infMOTDName) && behind == 0) { C.Data.Data = PhysicsArgs.RemoveFromChecks; return; }
+                if (behind == placerWBlock) { C.Data.Data = PhysicsArgs.RemoveFromChecks; return; }
                 int index;
                 lvl.GetBlock((ushort)(x - 1), y, z, out index);
                 lvl.AddUpdate(index, behind, true);
+
+                if (lvl.Config.MOTD.ToLower().Contains(infMOTDName))
+                {
+                    lvl.GetBlock((ushort)(x + 1), y, z, out index);
+                    lvl.AddUpdate(index, 0, true);
+                }
                 C.Data.Data = PhysicsArgs.RemoveFromChecks;
             }
         }
@@ -379,7 +528,7 @@ namespace MCGalaxy {
         }
 
         static void MsgDebugger(string message, params object[] args) {
-            Player debugger = PlayerInfo.FindExact(PluginPhysicsExample.author); if (debugger == null) { return; }
+            Player debugger = PlayerInfo.FindExact(illLogic.author); if (debugger == null) { return; }
             debugger.Message(message, args);
         }
         
