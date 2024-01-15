@@ -2,9 +2,9 @@
 
 /*
     IMPORTANT:
-    - This plugin closely replicates the crouching system from Minecraft 1.13 you are albe to bridge but you can't glide on the very edge of blocks
+    - This plugin closely replicates the crouching system from Minecraft 1.13 you can to bridge but you can't glide on the very edge of blocks
     - also see my swimming/crawling plugin https://github.com/LJplayswasused/classicube-thingys/blob/main/swimming.cs
-    - this plugin is based off of venk's crouching plugin and I used the cmdfly.cs file as reffernce
+    - this plugin is based off of venk's crouching plugin and I used the cmdfly.cs file as refernce
     
     Required setup:
     1./gb copy 0
@@ -18,7 +18,8 @@
     1. add CustomModels plugin: https://github.com/NotAwesome2/MCGalaxy-CustomModels/releases/tag/v1.4.2
     2. /cm upload crouch https://www.dropbox.com/s/doq1g2q0fjmep4v/crouch.bbmodel
     3. /cm config crouch eyeY 24
-    4. Press RSHIFT to toggle between crouching/not crouching
+    
+    Press RSHIFT to toggle between crouching/not crouching
 */
 
 using System;
