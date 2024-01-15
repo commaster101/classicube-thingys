@@ -8,7 +8,7 @@ using BlockID = System.UInt16;
 
 namespace MCGalaxy
 {
-    public sealed class illLogic : Plugin
+    public sealed class mcstairs : Plugin
     {
         public override string name { get { return "mcstairs"; } }
         public override string MCGalaxy_Version { get { return "1.9.4.1"; } }
