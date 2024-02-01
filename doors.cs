@@ -29,7 +29,7 @@ namespace MCGalaxy
                 {
                     BlockID block = p.level.GetBlock(x, y, z);
                     int fixblock = block;
-                    if (fixblock >= 66) fixblock = block - 256;
+                    if (fixblock >= 66) fixblock = block + 256;
 
                     //dark doors
                     if (fixblock == 99) p.level.UpdateBlock(p, x, y, z, 101);
