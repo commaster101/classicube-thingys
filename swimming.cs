@@ -43,7 +43,10 @@ namespace MCGalaxy
         {
             Player[] players = PlayerInfo.Online.Items;
             foreach (Player p in players)
-            { 
+            {
+                //check if the player is within the level
+                if (p.Pos.BlockX <= 0|| p.Pos.BlockZ <= 0|| p.Pos.BlockX >= p.level.MaxX|| p.Pos.BlockZ >= p.level.MaxZ) continue;
+
                 int x = p.Pos.BlockX, y = p.Pos.BlockY, z = p.Pos.BlockZ;
                 int px = p.Pos.X, pz = p.Pos.Z;
                 bool inblock = false;
@@ -53,7 +56,7 @@ namespace MCGalaxy
                 p.Extras["pastcoordx"] = px;
                 p.Extras["pastcoordz"] = pz;
                 //checks if your a human model so it will work with other plugins and doesnt turn a chicken into a person
-                if (inblock == true && ((p.IsLikelyInsideBlock()) || p.Extras.GetBoolean("wantsswim") == true) && (p.Model == "humanoid"))
+                if (inblock == true && ((p.IsLikelyInsideBlock()) || p.Extras.GetBoolean("wantsswim") == true) && (p.Model.Contains("humanoid") || p.Model.Contains("hold")))
                 {
                     p.UpdateModel("crawling");
                 }
@@ -78,11 +81,9 @@ namespace MCGalaxy
         {
             BlockID block = lvl.GetBlock(x, (ushort)y, z);
             BlockID block2 = lvl.GetBlock(x, (ushort)(y - 1), z);
-            int fixblock2 = block2;
-            if (fixblock2 >= 66) fixblock2 = block2 - 256;
             if (CollideType.IsSolid(lvl.CollideType(block))) return true;
-            //add list of blocks you can swim in here like this ...|| fixblock2 == [block id here]...)(can't use block def becuase lava isn't swimthrough)
-            if (fixblock2 == 9 || fixblock2 == 8)
+            //add list of blocks you can swim in here like this ...|| block2 == (Block.Extended | [block id here])...)(can't use block def becuase lava isn't swimthrough)
+            if (block2 == 9 || block2 == 8 || block2 == (Block.Extended | 160))
             {
               if ((p.Extras.GetInt("pastcoordx") != px) || (p.Extras.GetInt("pastcoordz") != pz)) return true;
               else return false;
@@ -100,6 +101,7 @@ namespace MCGalaxy
 
             public override void Use(Player p, string message, CommandData data)
             {
+                if (p.level.Config.MOTD.ToLower().Contains("-swim")) return;
                 p.Extras["wantsswim"] = true;
             }
 
