@@ -1,9 +1,12 @@
 using System;
 using System.Collections.Generic;
+//using System.Linq;
+//using System.Runtime.Remoting.Activation;
 using MCGalaxy.Blocks.Physics;
 using MCGalaxy.Events.LevelEvents;
 using MCGalaxy.Events.PlayerEvents;
 using MCGalaxy.Tasks;
+
 using BlockID = System.UInt16;
 
 namespace MCGalaxy {
@@ -124,7 +127,8 @@ namespace MCGalaxy {
             South,
             West,
             Up,
-            Down
+            Down,
+            None
         }
 
         void toggles(Player p, MouseButton button, MouseAction action, ushort yaw, ushort pitch, byte entity, ushort x, ushort y, ushort z, TargetBlockFace face)
@@ -151,56 +155,48 @@ namespace MCGalaxy {
             //int index = C.Index;
             ushort yCur = y;
 
-            bool instant = true;
-            ActivateablePhysics.DoDoors(lvl, (ushort)(x + 1), y, z, instant);
-            ActivateablePhysics.DoDoors(lvl, (ushort)(x - 1), y, z, instant);
-            ActivateablePhysics.DoDoors(lvl, x, y, (ushort)(z + 1), instant);
-            ActivateablePhysics.DoDoors(lvl, x, y, (ushort)(z - 1), instant);
-            ActivateablePhysics.DoDoors(lvl, x, (ushort)(y - 1), z, instant);
-            ActivateablePhysics.DoDoors(lvl, x, (ushort)(y + 1), z, instant);
-
             int index;
             BlockID block = lvl.GetBlock(x, y, z, out index);
             switch (block)
             {
                 case wireNBlock:
                     if (getInputsWire(lvl, x, y, z, Facing.North) == 0) break;
+                    updateNextTo(lvl, x, y, z, Facing.North);
                     lvl.AddUpdate(index, wireOnNBlock, true);
-                    lvl.AddCheck(index);
-                    updateNextTo(lvl, x, y, z);
+                    lvl.AddCheck(index,true);
                     break;
                 case wireEBlock:
                     if (getInputsWire(lvl, x, y, z, Facing.East) == 0) break;
                     lvl.AddUpdate(index, wireOnEBlock, true);
-                    lvl.AddCheck(index);
-                    updateNextTo(lvl, x, y, z);
+                    lvl.AddCheck(index,true);
+                    updateNextTo(lvl, x, y, z, Facing.East);
                     break;
                 case wireSBlock:
                     if (getInputsWire(lvl, x, y, z, Facing.South) == 0) break;
                     lvl.AddUpdate(index, wireOnSBlock, true);
-                    lvl.AddCheck(index);
-                    updateNextTo(lvl, x, y, z);
+                    lvl.AddCheck(index,true);
+                    updateNextTo(lvl, x, y, z, Facing.South);
                     break;
                 case wireWBlock:
                     if (getInputsWire(lvl, x, y, z, Facing.West) == 0) break;
                     lvl.AddUpdate(index, wireOnWBlock, true);
-                    lvl.AddCheck(index);
-                    updateNextTo(lvl, x, y, z);
+                    lvl.AddCheck(index,true);
+                    updateNextTo(lvl, x, y, z, Facing.West);
                     break;
                 case wireUBlock:
                     if (getInputsWire(lvl, x, y, z, Facing.Up) == 0) break;
                     lvl.AddUpdate(index, wireOnUBlock, true);
-                    lvl.AddCheck(index);
-                    updateNextTo(lvl, x, y, z);
+                    lvl.AddCheck(index,true);
+                    updateNextTo(lvl, x, y, z, Facing.Up);
                     break;
                 case wireDBlock:
                     if (getInputsWire(lvl, x, y, z, Facing.Down) == 0) break;
                     lvl.AddUpdate(index, wireOnDBlock, true);
-                    lvl.AddCheck(index);
-                    updateNextTo(lvl, x, y, z);
+                    lvl.AddCheck(index,true);
+                    updateNextTo(lvl, x, y, z, Facing.Down);
                     break;
             }
-            //C.Data.Data = PhysicsArgs.RemoveFromChecks;
+            C.Data.Data = PhysicsArgs.RemoveFromChecks;
         }
         //turn off wires
         static void DowireOn(Level lvl, ref PhysInfo C)
@@ -215,42 +211,42 @@ namespace MCGalaxy {
             {
                 case wireOnNBlock:
                     if (getInputsWire(lvl, x, y, z, Facing.North) != 0) break;
+                    updateNextTo(lvl, x, y, z, Facing.North);
                     lvl.AddUpdate(index, wireNBlock, true);
-                    lvl.AddCheck(index);
-                    updateNextTo(lvl, x, y, z);
+                    lvl.AddCheck(index,true);
                     break;
                 case wireOnEBlock:
                     if (getInputsWire(lvl, x, y, z, Facing.East) != 0) break;
+                    updateNextTo(lvl, x, y, z, Facing.East);
                     lvl.AddUpdate(index, wireEBlock, true);
-                    lvl.AddCheck(index);
-                    updateNextTo(lvl, x, y, z);
+                    lvl.AddCheck(index,true);
                     break;
                 case wireOnSBlock:
                     if (getInputsWire(lvl, x, y, z, Facing.South) != 0) break;
+                    updateNextTo(lvl, x, y, z, Facing.South);
                     lvl.AddUpdate(index, wireSBlock, true);
-                    lvl.AddCheck(index);
-                    updateNextTo(lvl, x, y, z);
+                    lvl.AddCheck(index,true);
                     break;
                 case wireOnWBlock:
                     if (getInputsWire(lvl, x, y, z, Facing.West) != 0) break;
+                    updateNextTo(lvl, x, y, z, Facing.West);
                     lvl.AddUpdate(index, wireWBlock, true);
-                    lvl.AddCheck(index);
-                    updateNextTo(lvl, x, y, z);
+                    lvl.AddCheck(index,true);
                     break;
                 case wireOnUBlock:
                     if (getInputsWire(lvl, x, y, z, Facing.Up) != 0) break;
+                    updateNextTo(lvl, x, y, z, Facing.Up);
                     lvl.AddUpdate(index, wireUBlock, true);
-                    lvl.AddCheck(index);
-                    updateNextTo(lvl, x, y, z);
+                    lvl.AddCheck(index,true);
                     break;
                 case wireOnDBlock:
                     if (getInputsWire(lvl, x, y, z, Facing.Down) != 0) break;
+                    updateNextTo(lvl, x, y, z, Facing.Down);
                     lvl.AddUpdate(index, wireDBlock, true);
-                    lvl.AddCheck(index);
-                    updateNextTo(lvl, x, y, z);
+                    lvl.AddCheck(index,true);
                     break;
             }
-            //C.Data.Data = PhysicsArgs.RemoveFromChecks;
+            C.Data.Data = PhysicsArgs.RemoveFromChecks;
         }
         //copy of wire but is activated on click
         static void Dotoggle(Player p, ushort x, ushort y, ushort z)
@@ -271,15 +267,14 @@ namespace MCGalaxy {
                 lvl.AddUpdate(index, block, true);
             }
 
-            bool instant = true;
+            powerNextTo(lvl, x, y, z);
+            bool instant = false;
             ActivateablePhysics.DoDoors(lvl, (ushort)(x + 1), y, z, instant);
             ActivateablePhysics.DoDoors(lvl, (ushort)(x - 1), y, z, instant);
             ActivateablePhysics.DoDoors(lvl, x, y, (ushort)(z + 1), instant);
             ActivateablePhysics.DoDoors(lvl, x, y, (ushort)(z - 1), instant);
             ActivateablePhysics.DoDoors(lvl, x, (ushort)(y - 1), z, instant);
             ActivateablePhysics.DoDoors(lvl, x, (ushort)(y + 1), z, instant);
-
-            powerNextTo(lvl, x, y, z);
         }
 
         static int getInputsWire(Level lvl,ushort x,ushort y, ushort z, Facing facing)
@@ -363,7 +358,7 @@ namespace MCGalaxy {
         {
             int index;
             BlockID block = lvl.GetBlock(x, y, z, out index);    
-            lvl.AddCheck(index);
+            lvl.AddCheck(index,true);
         }
         static void powerNextTo(Level lvl,ushort x,ushort y,ushort z)
         {
@@ -374,26 +369,83 @@ namespace MCGalaxy {
             powerBlock(lvl, x, (ushort)(y + 1), z);
             powerBlock(lvl, x, (ushort)(y - 1), z);
         }
-        static void updateNextTo(Level lvl, ushort x, ushort y, ushort z)
+        static void updateNextTo(Level lvl, ushort x, ushort y, ushort z, Facing facing)
         {
             int index;
-            lvl.GetBlock((ushort)(x + 1), y, z, out index);
-            lvl.AddCheck(index);
+            if ((lvl.GetBlock((ushort)(x + 1), y, z) == wireOnEBlock || lvl.GetBlock((ushort)(x + 1), y, z) == wireEBlock) && facing != Facing.East && facing != Facing.West)
+            {
+                lvl.GetBlock((ushort)(x + 1), y, z, out index);
+                lvl.AddCheck(index,true);
+            }
+            if ((lvl.GetBlock((ushort)(x - 1), y, z) == wireOnWBlock || lvl.GetBlock((ushort)(x - 1), y, z) == wireWBlock) && facing != Facing.East && facing != Facing.West)
+            {
+                lvl.GetBlock((ushort)(x - 1), y, z, out index);
+                lvl.AddCheck(index,true);
+            }
+            if ((lvl.GetBlock(x, y, (ushort)(z + 1)) == wireOnSBlock || lvl.GetBlock(x, y, (ushort)(z + 1)) == wireSBlock) && facing != Facing.North && facing != Facing.South)
+            {
+                lvl.GetBlock(x, y, (ushort)(z + 1), out index);
+                lvl.AddCheck(index,true);
+            }
+            if ((lvl.GetBlock(x, y, (ushort)(z - 1)) == wireOnNBlock || lvl.GetBlock(x, y, (ushort)(z - 1)) == wireNBlock) && facing != Facing.North && facing != Facing.South)
+            {
+                lvl.GetBlock(x, y, (ushort)(z - 1), out index);
+                lvl.AddCheck(index,true);
+            }
+            if ((lvl.GetBlock(x, (ushort)(y + 1), z) == wireOnUBlock || lvl.GetBlock(x, (ushort)(y + 1), z) == wireUBlock) && facing != Facing.Up && facing != Facing.Down)
+            {
+                lvl.GetBlock(x, (ushort)(y + 1), z, out index);
+                lvl.AddCheck(index,true);
+            }
+            if ((lvl.GetBlock(x, (ushort)(y - 1), z) == wireOnDBlock || lvl.GetBlock(x, (ushort)(y - 1), z) == wireDBlock) && facing != Facing.Up && facing != Facing.Down)
+            {
+                lvl.GetBlock(x, (ushort)(y - 1), z, out index);
+                lvl.AddCheck(index,true);
+            }
 
-            lvl.GetBlock((ushort)(x - 1), y, z, out index);
-            lvl.AddCheck(index);
+            switch (facing)
+            {
+                case Facing.East:
+                    lvl.GetBlock((ushort)(x + 1), y, z, out index);
+                    lvl.AddCheck(index,true);
+                    if (IsBlockLogic(lvl.GetBlock((ushort)(x + 1), y, z))) updateNextTo(lvl, (ushort)(x + 1), y, z, Facing.None);
+                    break;
+                case Facing.West:
+                    lvl.GetBlock((ushort)(x - 1), y, z, out index);
+                    lvl.AddCheck(index,true);
+                    if (IsBlockLogic(lvl.GetBlock((ushort)(x + 1), y, z))) updateNextTo(lvl, (ushort)(x - 1), y, z, Facing.None);
+                    break;
+                case Facing.North:
+                    lvl.GetBlock(x, y, (ushort)(z - 1), out index);
+                    lvl.AddCheck(index,true);
+                    if (IsBlockLogic(lvl.GetBlock(x, y, (ushort)(z - 1)))) updateNextTo(lvl, x, y, (ushort)(z - 1), Facing.None);
+                    break;
+                case Facing.South:
+                    lvl.GetBlock(x, y, (ushort)(z + 1), out index);
+                    lvl.AddCheck(index,true);
+                    if (IsBlockLogic(lvl.GetBlock(x, y, (ushort)(z + 1)))) updateNextTo(lvl, x, y, (ushort)(z + 1), Facing.None);
+                    break;
+                case Facing.Up:
+                    lvl.GetBlock(x, (ushort)(y + 1), z, out index);
+                    lvl.AddCheck(index,true);
+                    if (IsBlockLogic(lvl.GetBlock(x, (ushort)(y + 1), z))) updateNextTo(lvl, x, (ushort)(y + 1), z, Facing.None);
+                    break;
+                case Facing.Down:
+                    lvl.GetBlock(x, (ushort)(y - 1), z, out index);
+                    lvl.AddCheck(index,true);
+                    if (IsBlockLogic(lvl.GetBlock(x, (ushort)(y - 1), z))) updateNextTo(lvl, x, (ushort)(y - 1), z, Facing.None);
+                    break;
+                default : break;
 
-            lvl.GetBlock(x, y, (ushort)(z + 1), out index);
-            lvl.AddCheck(index);
+            }
+            bool instant = false;
+            ActivateablePhysics.DoDoors(lvl, (ushort)(x + 1), y, z, instant);
+            ActivateablePhysics.DoDoors(lvl, (ushort)(x - 1), y, z, instant);
+            ActivateablePhysics.DoDoors(lvl, x, y, (ushort)(z + 1), instant);
+            ActivateablePhysics.DoDoors(lvl, x, y, (ushort)(z - 1), instant);
+            ActivateablePhysics.DoDoors(lvl, x, (ushort)(y - 1), z, instant);
+            ActivateablePhysics.DoDoors(lvl, x, (ushort)(y + 1), z, instant);
 
-            lvl.GetBlock(x, y, (ushort)(z - 1), out index);
-            lvl.AddCheck(index);
-
-            lvl.GetBlock(x, (ushort)(y + 1), z, out index);
-            lvl.AddCheck(index);
-
-            lvl.GetBlock(x, (ushort)(y - 1), z, out index);
-            lvl.AddCheck(index);
         }
 
         static bool IsBlockPowered(Level lvl, ushort x, ushort y, ushort z)
@@ -430,9 +482,30 @@ namespace MCGalaxy {
                 default: return false;
             }
         }
+        static bool IsBlockLogic(BlockID block)
+        {
+            switch (block)
+            {
+                case andBlock: return true;
+                    break;
+                case notBlock:return true;
+                    break;
+                case orBlock:return true;
+                    break;
+                case nandBlock: return true;
+                    break;
+                case norBlock: return true;
+                    break;
+                case xorBlock: return true;
+                    break;
+                case xnorBlock: return true;
+                    break;
+                default: return false;
+            }
+        }
 
         static void MsgDebugger(string message, params object[] args) {
-            Player debugger = PlayerInfo.FindExact(illLogic.author); if (debugger == null) { return; }
+            Player debugger = PlayerInfo.FindExact(compLogic.author); if (debugger == null) { return; }
             debugger.Message(message, args);
         }
         
