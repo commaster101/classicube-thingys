@@ -1,7 +1,5 @@
 using System;
 using System.Collections.Generic;
-//using System.Linq;
-//using System.Runtime.Remoting.Activation;
 using MCGalaxy.Blocks.Physics;
 using MCGalaxy.Events.LevelEvents;
 using MCGalaxy.Events.PlayerEvents;
@@ -10,7 +8,7 @@ using BlockID = System.UInt16;
 
 namespace MCGalaxy {
 	
-	public sealed class illLogic : Plugin {
+	public sealed class compLogic : Plugin {
 		public override string name { get { return "compLogic"; } }
 		public override string MCGalaxy_Version { get { return "1.9.4.1"; } }
         //This name is used to determine who to send debug text to
