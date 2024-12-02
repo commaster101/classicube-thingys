@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
-//using System.Linq;
-//using System.Runtime.Remoting.Activation;
+
 using MCGalaxy.Blocks.Physics;
 using MCGalaxy.Events.LevelEvents;
 using MCGalaxy.Events.PlayerEvents;
@@ -268,13 +267,13 @@ namespace MCGalaxy {
             }
 
             powerNextTo(lvl, x, y, z);
-            bool instant = false;
+            /*bool instant = false;
             ActivateablePhysics.DoDoors(lvl, (ushort)(x + 1), y, z, instant);
             ActivateablePhysics.DoDoors(lvl, (ushort)(x - 1), y, z, instant);
             ActivateablePhysics.DoDoors(lvl, x, y, (ushort)(z + 1), instant);
             ActivateablePhysics.DoDoors(lvl, x, y, (ushort)(z - 1), instant);
             ActivateablePhysics.DoDoors(lvl, x, (ushort)(y - 1), z, instant);
-            ActivateablePhysics.DoDoors(lvl, x, (ushort)(y + 1), z, instant);
+            ActivateablePhysics.DoDoors(lvl, x, (ushort)(y + 1), z, instant);*/
         }
 
         static int getInputsWire(Level lvl,ushort x,ushort y, ushort z, Facing facing)
@@ -413,7 +412,7 @@ namespace MCGalaxy {
                 case Facing.West:
                     lvl.GetBlock((ushort)(x - 1), y, z, out index);
                     lvl.AddCheck(index,true);
-                    if (IsBlockLogic(lvl.GetBlock((ushort)(x + 1), y, z))) updateNextTo(lvl, (ushort)(x - 1), y, z, Facing.None);
+                    if (IsBlockLogic(lvl.GetBlock((ushort)(x - 1), y, z))) updateNextTo(lvl, (ushort)(x - 1), y, z, Facing.None);
                     break;
                 case Facing.North:
                     lvl.GetBlock(x, y, (ushort)(z - 1), out index);
@@ -435,16 +434,17 @@ namespace MCGalaxy {
                     lvl.AddCheck(index,true);
                     if (IsBlockLogic(lvl.GetBlock(x, (ushort)(y - 1), z))) updateNextTo(lvl, x, (ushort)(y - 1), z, Facing.None);
                     break;
+                    
                 default : break;
 
             }
-            bool instant = false;
+            /*bool instant = false;
             ActivateablePhysics.DoDoors(lvl, (ushort)(x + 1), y, z, instant);
             ActivateablePhysics.DoDoors(lvl, (ushort)(x - 1), y, z, instant);
             ActivateablePhysics.DoDoors(lvl, x, y, (ushort)(z + 1), instant);
             ActivateablePhysics.DoDoors(lvl, x, y, (ushort)(z - 1), instant);
             ActivateablePhysics.DoDoors(lvl, x, (ushort)(y - 1), z, instant);
-            ActivateablePhysics.DoDoors(lvl, x, (ushort)(y + 1), z, instant);
+            ActivateablePhysics.DoDoors(lvl, x, (ushort)(y + 1), z, instant);*/
 
         }
 
